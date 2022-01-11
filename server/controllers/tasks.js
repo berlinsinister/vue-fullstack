@@ -1,37 +1,9 @@
-const mongoose = require('mongoose');
-const { Schema } = require('mongoose');
-
-const Task = mongoose.model(
-  'Tasks',
-  Schema({
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 30,
-    },
-    url: {
-      type: String,
-      default: '',
-    },
-    category: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      default: 'not started',
-    },
-  })
-);
+const Task = require('../models/Task');
 
 // create
 const createTask = async (req, res) => {
   try {
+    req.body.createdBy = req.user.userId;
     const task = await Task.create(req.body);
     res.status(201).json({ msg: task });
   } catch (error) {
@@ -42,18 +14,23 @@ const createTask = async (req, res) => {
 // read
 const readAllTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({});
+    // const tasks = await Task.find({});
+    const tasks = await Task.find({ createdBy: req.user.userId });
     tasks.reverse();
-    res.status(200).send(tasks);
+    res.status(200).send({ nbHits: tasks.length, tasks });
   } catch (error) {
     res.status(500).json({ msg: error.message });
   }
 };
 
 const readSingleTask = async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const {
+    user: { userId },
+    params: { id: taskId },
+  } = req;
   try {
-    const task = await Task.findOne({ _id: id });
+    const task = await Task.findOne({ _id: taskId, createdBy: userId });
     if (!task) {
       return res.status(404).json({ msg: 'no such ID' });
     }
@@ -65,12 +42,20 @@ const readSingleTask = async (req, res) => {
 
 // update
 const updateTask = async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const {
+    user: { userId },
+    params: { id: taskId },
+  } = req;
   try {
-    const task = await Task.findOneAndUpdate({ _id: id }, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const task = await Task.findOneAndUpdate(
+      { _id: taskId, createdBy: userId },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!task) {
       return res.status(404).json({ msg: 'no such ID' });
     }
@@ -82,9 +67,16 @@ const updateTask = async (req, res) => {
 
 // delete
 const deleteTask = async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const {
+    user: { userId },
+    params: { id: taskId },
+  } = req;
   try {
-    const task = await Task.findOneAndDelete({ _id: id });
+    const task = await Task.findOneAndDelete({
+      _id: taskId,
+      createdBy: userId,
+    });
     if (!task) {
       return res.status(404).json({ msg: 'no such ID' });
     }

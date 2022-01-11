@@ -1,20 +1,21 @@
 const express = require('express');
 const cors = require('cors');
-// const bodyParser = require('body-parser');
 require('dotenv').config();
 const mongoose = require('mongoose');
-const routes = require('./routes/index');
+const authRoutes = require('./routes/auth');
+const taskRoutes = require('./routes/tasks');
+const auth = require('./middleware/auth');
 
 const app = express();
 
 // middleware
-// app.use(bodyParser.json());
 app.use(express.json());
 app.use(cors());
-const api = '/api/v1/tasks';
-app.use(api, routes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/tasks', auth, taskRoutes);
+// app.use('/api/v1/tasks', taskRoutes);
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 mongoose
   .connect(process.env.MONGO_URI)
   .then(app.listen(PORT, () => console.log('vue-express fullstack')))
