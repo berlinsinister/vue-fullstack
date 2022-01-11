@@ -15,6 +15,10 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tasks', auth, taskRoutes);
 // app.use('/api/v1/tasks', taskRoutes);
 
+// const path = require('path');
+// const serveStatic = require('serve-static');
+// app.use(serveStatic(__dirname + '/dist'));
+
 const PORT = process.env.PORT || 5000;
 mongoose
   .connect(process.env.MONGO_URI)
