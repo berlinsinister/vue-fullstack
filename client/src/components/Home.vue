@@ -237,6 +237,7 @@ export default {
         background: linear-gradient(90deg, #9d83f1, #ff73b3);
         margin-top: auto;
         animation: error-border 0.5s 3 ease-out;
+        // testing...
         @keyframes error-border {
           0% {
             transform: scaleX(0.01);
